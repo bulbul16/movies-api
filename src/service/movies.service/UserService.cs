@@ -1,6 +1,7 @@
-﻿using movies.domain.business_interface;
+﻿
 using movies.domain.data_interface;
 using movies.domain.models;
+using movies.domain.service_interface;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,6 +20,11 @@ namespace movies.service
         public List<User> GetAllAsync()
         {
             return _userRepository.GetAllAsync();
+        }
+
+        public User GetByIdAsync(int id)
+        {
+            return _userRepository.GetByIdAsync(id);
         }
     }
 }

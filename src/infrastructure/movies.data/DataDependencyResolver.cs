@@ -15,6 +15,7 @@ namespace movies.data
         {
             service.AddDbContext<MovieDBContext>(option => option.UseSqlServer(configuration.GetConnectionString("MovieDatabase")));
             service.AddScoped<IUserRepository, UserRepository>();
+            service.AddScoped<IUserSerachLogRepository, UserSearchLogRepository>();
             return service;
         }
     }

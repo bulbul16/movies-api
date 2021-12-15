@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="view-models\" />
+    <Compile Remove="view-models\**" />
+    <EmbeddedResource Remove="view-models\**" />
+    <None Remove="view-models\**" />
   </ItemGroup>
 
 </Project>

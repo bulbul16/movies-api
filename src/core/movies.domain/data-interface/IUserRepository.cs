@@ -9,5 +9,6 @@ namespace movies.domain.data_interface
     public interface IUserRepository
     {
         List<User> GetAllAsync();
+        User GetByIdAsync(int id);
     }
 }

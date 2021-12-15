@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using movies.data;
+using movies.domain.app_setting;
 using movies.service;
 using System;
 using System.Collections.Generic;
@@ -29,31 +30,15 @@ namespace movies.api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            // Resolving data and business dependency
             services.AddDBServices(this.Configuration);
             services.AddBusinessServices();
 
+            //
+            services.Configure<MovieDBInfo>(Configuration.GetSection("MovieDbInfo"));
+
             services.AddSwaggerGen();
-            //    c =>
-            //{
-            //    c.SwaggerDoc("V1", new OpenApiInfo
-            //    {
-            //        Version = "V1",
-            //        Title = "Movies API",
-            //        Description = "Search Movies,Peoples and TV Shows.",
-            //        TermsOfService = new Uri("https://github.com/bulbul16"),
-            //        Contact = new OpenApiContact
-            //        {
-            //            Name = "Bulbul Ahmed",
-            //            Email = "bulbul.cse@outlook.com",
-            //            Url = new Uri("https://github.com/bulbul16/movies-api")
-            //        },
-            //        License = new OpenApiLicense
-            //        {
-            //            Name = "Opensource BL License",
-            //            Url = new Uri("https://github.com/bulbul16")
-            //        },
-            //    });
-            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

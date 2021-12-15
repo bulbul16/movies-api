@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using movies.domain.business_interface;
+using movies.domain.service_interface;
 using System;
 using System.Threading.Tasks;
 
@@ -10,10 +10,10 @@ namespace movies.api.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private IUserService _service;
+        private IUserService _userService;
         public UserController(IUserService service)
         {
-            _service = service;
+            _userService = service;
         }
 
         [HttpGet]
@@ -21,7 +21,21 @@ namespace movies.api.Controllers
         {
             try
             {
-                var result = _service.GetAllAsync();
+                var result = _userService.GetAllAsync();
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpGet("{id:int}")]
+        public IActionResult Get(int id)
+        {
+            try
+            {
+                var result = _userService.GetByIdAsync(id);
                 return Ok(result);
             }
             catch (Exception)

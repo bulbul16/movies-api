@@ -19,5 +19,10 @@ namespace movies.data
         {
             return _context.Users.ToList();
         }
+
+        public User GetByIdAsync(int id)
+        {
+            return _context.Users.Find(id);
+        }
     }
 }

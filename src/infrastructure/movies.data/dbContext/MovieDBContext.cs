@@ -21,5 +21,6 @@ namespace movies.data.dbContext
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<UserSearchLog> UserSearchLogs { get; set; }
     }
 }
