@@ -46,6 +46,8 @@ namespace movies.data.Migrations
 
                     b.Property<string>("SearchText");
 
+                    b.Property<string>("SearchType");
+
                     b.Property<int>("UserId");
 
                     b.HasKey("Id");
