@@ -1,6 +1,8 @@
-﻿using movies.domain.data_interface;
+﻿using movies.api.Models.Search;
+using movies.domain.data_interface;
 using movies.domain.models;
 using movies.domain.service_interface;
+using movies.domain.view_model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,9 +23,19 @@ namespace movies.service
             return _userSearchLogRepository.GetAllAsync();
         }
 
-        public UserSearchLog SaveAsync(UserSearchLog userServiceLogModel)
+        public UserSearchLog SaveAsync(string searchResult, string query, int userId, string SearchType, string url)
         {
-            return _userSearchLogRepository.SaveAsync(userServiceLogModel);
+            var model = new domain.models.UserSearchLog()
+            {
+                SearchDate = DateTime.Now,
+                SearchResult = searchResult,
+                SearchText = query,
+                UserId = userId,
+                SearchType = SearchType,
+                RequestUrl = url
+            };
+
+            return _userSearchLogRepository.SaveAsync(model);
         }
     }
 }

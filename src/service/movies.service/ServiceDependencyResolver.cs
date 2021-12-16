@@ -14,6 +14,7 @@ namespace movies.service
         {
             service.AddScoped<IUserService, UserService>();
             service.AddScoped<IUserSearchLogService, UserSearchLogService>();
+            service.AddScoped<IHttpClientService, HttpClientService>();
 
             return service;
         }

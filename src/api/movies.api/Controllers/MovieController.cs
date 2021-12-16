@@ -4,7 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using movies.api.Models.Search;
 using movies.domain.app_setting;
+using movies.domain.enums;
 using movies.domain.service_interface;
+using movies.domain.view_model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,46 +21,95 @@ namespace movies.api.Controllers
     {
         private MovieDBInfo _movieDBInfo;
         private IUserSearchLogService _userSearchLogService;
-        public MovieController(IOptions<MovieDBInfo> movieInfo, IUserSearchLogService userSearchLogService)
+        private IHttpClientService _httpClientService;
+        public MovieController(IOptions<MovieDBInfo> movieInfo, IUserSearchLogService userSearchLogService, IHttpClientService httpClientService)
         {
             _movieDBInfo = movieInfo.Value;
             _userSearchLogService = userSearchLogService;
+            _httpClientService = httpClientService;
         }
 
         [HttpPost]
-        public async Task<string> Search(MovieSearchParameter searchParameter)
+        public async Task<string> Search(SearchParameter searchParameter)
         {
-            string searchResult = "";
-            List<domain.models.UserSearchLog> userSearchLogList = _userSearchLogService.GetAllAsync().Where(c => c.SearchText == searchParameter.SearhText && c.SearchType == "Movie").ToList();
-            if (userSearchLogList.Count > 0)
+            try
             {
-                searchResult = userSearchLogList[0].SearchResult;
-            }
-            else
-            {
-                searchResult = await SearchMoviesByHttpClient(searchParameter);
+                var searchResult = string.Empty;
 
-                var model = new domain.models.UserSearchLog()
+                var url = GenerateUrl(searchParameter);
+
+                List<domain.models.UserSearchLog> userSearchLogList = _userSearchLogService.GetAllAsync().Where(c => c.RequestUrl == url && c.UserId == searchParameter.UserId).ToList();
+
+                if (userSearchLogList.Count > 0)
                 {
-                    SearchDate = DateTime.Now,
-                    SearchResult = searchResult,
-                    SearchText = searchParameter.SearhText,
-                    UserId = searchParameter.UserId,
-                    SearchType = "Movie"
-
-                };
-
-                _userSearchLogService.SaveAsync(model);
+                    searchResult = userSearchLogList[0].SearchResult;
+                }
+                else
+                {
+                    searchResult = await _httpClientService.GetAsync(url);
+                    _userSearchLogService.SaveAsync(searchResult, searchParameter.Query, searchParameter.UserId, SearchType.Movie.ToString(), url);
+                }
+                return searchResult;
             }
-            return searchResult;
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
-        private async Task<string> SearchMoviesByHttpClient(MovieSearchParameter searchParameter)
+        [HttpPost("{id}")]
+        public async Task<string> SearchById(int id, [FromBody] DetailSearchParameter searchParameter)
         {
-            string url = _movieDBInfo.MovieApiAccessPoint + $"?api_key={_movieDBInfo.Api_Key}&language=en-US&page=1&include_adult=false&query={searchParameter.SearhText}";
-            var client = new HttpClient();
-            var response = await client.GetAsync(url);
-            return await response.Content.ReadAsStringAsync();
+            try
+            {
+                var searchResult = string.Empty;
+
+                var url = GenerateUrlForMovieDetail(id, searchParameter);
+
+                List<domain.models.UserSearchLog> userSearchLogList = _userSearchLogService.GetAllAsync().Where(c => c.RequestUrl == url && c.UserId == searchParameter.UserId).ToList();
+
+                if (userSearchLogList.Count > 0)
+                {
+                    searchResult = userSearchLogList[0].SearchResult;
+                }
+                else
+                {
+                    searchResult = await _httpClientService.GetAsync(url);
+                    _userSearchLogService.SaveAsync(searchResult, id.ToString(), searchParameter.UserId, SearchType.Movie.ToString(), url);
+                }
+
+                return searchResult;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private string GenerateUrl(SearchParameter searchParameter)
+        {
+            var url = string.Empty;
+            if (searchParameter.Language == string.Empty)
+                searchParameter.Language = "en-US";
+            if (searchParameter.Page == 0)
+                searchParameter.Page = 1;
+            if (!searchParameter.Include_Adult.Value)
+                searchParameter.Include_Adult = true;
+
+            url = _movieDBInfo.MovieApiAccessPoint + $"?api_key={_movieDBInfo.Api_Key}&language={searchParameter.Language}&page={searchParameter.Page}&include_adult={searchParameter.Include_Adult}&query={searchParameter.Query}";
+            return url;
+        }
+
+        private string GenerateUrlForMovieDetail(int movieId, DetailSearchParameter searchParameter)
+        {
+            var url = string.Empty;
+            if (searchParameter.Language == string.Empty)
+                searchParameter.Language = "en-US";
+
+            url = _movieDBInfo.MovieDetailApiAccessPoint + movieId + $"?api_key={_movieDBInfo.Api_Key}&language={searchParameter.Language}";
+            return url;
         }
     }
 }

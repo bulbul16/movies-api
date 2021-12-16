@@ -12,5 +12,6 @@ namespace movies.domain.models
         public string SearchType { get; set; }
         public string SearchResult { get; set; }
         public DateTime? SearchDate { get; set; }
+        public string RequestUrl { get; set; }
     }
 }
